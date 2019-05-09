@@ -1,7 +1,10 @@
 TERMPROJ start   3A0
 .THIS IS A COMMENT LINE
-LBL1     BYTE    C'ABCDEF'
+ LBL1    BYTE    C'ABCDEF'
 LBL2     RESB    4
-LBL2     RESW    1
-TOP      LDA     ZERO
+INDEX    byte    x'24Ba'    
+LBL3     RESW    1
+TOP      LDA     @INDEX
+         TIXR     S
+         j       *2
          LDX     #INDEX
