@@ -4,10 +4,7 @@
  * and open the template in the editor.
  */
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 
@@ -223,26 +220,64 @@ public class Assembler {
     		}
     	}
     }
-    public static void Objectcode() {
-    	for(int i=0;i<Instructions.size();i++) {
-    		int form=Instructions.get(i).getFormat();
-    		if(form==2) {
-    			String s=String.;
-    			Instructions.get(i).setObc(s);
-    			
-    			
-    		}
-    		if(form==2) {
-    			String s;
-    			byte b= getBytes(s);
-    			
-    		}
-    	}
-    }
+
+	public static void Objectcode() {
+		String name = labels.get(0).getLabel().trim();
+		String address = labels.get(0).getAddress().trim();
+		int start = Integer.parseInt(labels.get(0).getAddress(),16);
+		int end = Integer.parseInt(labels.get(labels.size()-1).getAddress(),16);
+		int integerLength = end - start;
+		String stringLength = Integer.toHexString(integerLength);
+
+
+
+		try
+		{
+			File file = new File("obj.txt");
+			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+
+			writer.write("H^" + name + "^" + address+"^"+stringLength+"\n");
+
+
+			for (int i = 0; i < Instructions.size(); i++)
+			{
+				int form = Instructions.get(i).getFormat();
+				switch(form)
+				{
+					case 1: {
+
+						break;
+					}
+					case 2:{
+
+						break;
+					}
+					case 3:{
+
+						break;
+					}
+					case 4:
+					{
+						break;
+					}
+					default:
+						break;
+				}
+			}
+			writer.close();
+	}
+	catch (IOException e)
+
+	{
+		e.printStackTrace();
+	}
+	}
+
     public static void main(String[] args) {
         // TODO code application logic here
         processFixedFormat(readFile("Code.txt"));
         symtb();
+        Objectcode();
     }
     
 }

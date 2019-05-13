@@ -1,7 +1,7 @@
 import java.util.HashMap;
 
 
-public class OperationMap {
+public class  OperationMap {
     
     
     public static HashMap<String, FormatOpcodePair> OperationToFormat;//Mnemonic and format
