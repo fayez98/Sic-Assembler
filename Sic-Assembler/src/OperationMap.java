@@ -1,7 +1,8 @@
+package sic;
 import java.util.HashMap;
 
 
-public class  OperationMap {
+public class OperationMap {
     
     
     public static HashMap<String, FormatOpcodePair> OperationToFormat;//Mnemonic and format
@@ -131,6 +132,7 @@ public class  OperationMap {
     public static FormatOpcodePair getPair(String mnemonic){
         if(mnemonic == null)
             return null;
+        mnemonic = mnemonic.toLowerCase();
         if(!OperationToFormat.containsKey(mnemonic))
             return null;
         

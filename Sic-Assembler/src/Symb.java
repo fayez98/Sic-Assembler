@@ -1,4 +1,4 @@
-
+package sic;
 public class Symb {
 	String label;
 	String address;
