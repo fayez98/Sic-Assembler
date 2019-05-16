@@ -1,3 +1,4 @@
+package sic;
 import java.util.ArrayList;
 
 public class Instruction {//possible class Field with sub classes label mnemonic operand comment,, and Error field to know which field caused the error
@@ -8,23 +9,46 @@ public class Instruction {//possible class Field with sub classes label mnemonic
     String comment;
     String obc;
     public String errorMessage;
+    char expressionType = '+';
+    String expression1;
+    String expression2;
     String address;
+    int offset; // label +3
+    boolean registerOperation = false;
+    Byte [] OperandBytes;
+    public static int PASS = 1;
+
+    public boolean isRegisterOperation() {
+        return registerOperation;
+    }
+
+    public void setRegisterOperation(boolean registerOperation) {
+        this.registerOperation = registerOperation;
+    }
+
+    public String getPassTwoError() {
+        return passTwoError;
+    }
+
+    public void setPassTwoError(String passTwoError) {
+        this.passTwoError = passTwoError;
+    }
+    boolean indirect = false; // @ALPHA
+    boolean immediate = false ;  //#alpha
+    boolean direct  = true;     //ALPHA
     boolean commentLine = false;
     boolean directive = false;
     boolean Label;
     boolean indexing;
     public boolean error = false;
+    String passTwoError;
     int errorCount;
     int format = 0;
+    String r1,r2;
     byte opcode;
     //label 1:8 , 9 unused
     //10 ;15 ,mnemonic,16:17 unused, 18:35 operand,36:66 comment
-    public Instruction(String label, String mnemonic, String operand,String comment) {
-        this.errorMessage="";
-        this.label = label;
-        this.mnemonic = mnemonic;
-        this.operand = operand;
-    }
+
     
     public String getErrorMessage() {
         return errorMessage;
@@ -32,6 +56,67 @@ public class Instruction {//possible class Field with sub classes label mnemonic
     
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public String getR1() {
+        return r1;
+    }
+
+    public void setR1(String r1) {
+        this.r1 = r1;
+    }
+
+    public String getR2() {
+        return r2;
+    }
+
+    public void setR2(String r2) {
+        this.r2 = r2;
+    }
+
+    public int getOffset() {
+        return offset;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
+
+    public boolean isIndirect() {
+        return indirect;
+    }
+    public void appendPass2Error(String err){
+        if(this.passTwoError==null)
+            this.passTwoError ="";
+        this.passTwoError+=err;
+        this.setError(true);
+    }
+    public void setIndirect(boolean indirect) {
+        this.indirect = indirect;
+    }
+
+    public boolean isImmediate() {
+        return immediate;
+    }
+
+    public void setImmediate(boolean immediate) {
+        this.immediate = immediate;
+    }
+
+    public boolean isDirect() {
+        return direct;
+    }
+
+    public void setDirect(boolean direct) {
+        this.direct = direct;
+    }
+
+    public boolean isLabel() {
+        return Label;
+    }
+
+    public void setLabel(boolean Label) {
+        this.Label = Label;
     }
     
     public byte getOpcode() {
@@ -60,6 +145,7 @@ public class Instruction {//possible class Field with sub classes label mnemonic
     
     public void setAddress(int add) {
     	this.address=Integer.toHexString(add);
+        
     }
     public boolean isCommentLine() {
         return commentLine;
@@ -80,12 +166,16 @@ public class Instruction {//possible class Field with sub classes label mnemonic
         return comment;
     }
     public void appendErrorMessage(String Message){
+        error = true;
         if(Message!=null)
-            this.errorMessage+="-"+Message;
+            this.errorMessage+="\n"+Message;
     }
     public Instruction(String line){// When reading from file an empty character is placed at the beginning so I can start at index 1 
         int len = line.length();
+        r1 = "empty";
+        r2 = "empty";
         errorCount =0;
+        offset = 0;
         errorMessage ="";
         if(line.charAt(1) =='.' ){
             commentLine =true;
@@ -93,28 +183,38 @@ public class Instruction {//possible class Field with sub classes label mnemonic
         }else{
         	if(line.charAt(1)==' '&&line.charAt(2)!=' ') {
         		this.error = true;
-                this.errorMessage ="\t\t****Error: Missplaced Label";
+                this.appendErrorMessage("\t\t****Error: Misplaced Label");
         	}
             if(line.charAt(10)==' ') {
                 this.error = true;
-                this.errorMessage ="\t\t****Error: Missing or missplaced menomonic";
+                this.appendErrorMessage("\t\t****Error: Missing or missplaced menomonic");
             }
             if(line.charAt(18)==' ') {
                 this.error = true;
-                this.errorMessage="\t\t****Error: Missing or misspalced operand";
+                if(line.length()<=17)
+                    if(line.substring(10, 17).trim().equalsIgnoreCase("end")==false)
+                        this.appendErrorMessage("\t\t****Error: Missing or misspalced operand");
                 
             }
             //Should Unused fields always beempty or it doesnt matter?            
             if(false)
                 error  = true;
             else{
-            this.label = line.substring(1,9);
+            this.label = line.substring(1,10);
+            if(this.label.trim().equals(""))
+                    this.Label = false;
+            else{
+                if(this.label.trim().contains(" ")){
+                    this.appendErrorMessage("\t\t****Error: Error Label cannot contain spaces");
+                }
+            }
             if(line.charAt(1)!=' ') {
             	this.Label=true;
+                
             }
             else
             	this.Label=false;
-            this.mnemonic = line.substring(10,17);
+            this.mnemonic = line.substring(10,18);
             this.findFormatandOpcode();
             if(this.error&&this.mnemonic.charAt(0)=='+') {
             	String s=this.mnemonic.trim();
@@ -210,6 +310,30 @@ public class Instruction {//possible class Field with sub classes label mnemonic
         this.directive = directive;
     }
 
+    public char getExpressionType() {
+        return expressionType;
+    }
+
+    public void setExpressionType(char expressionType) {
+        this.expressionType = expressionType;
+    }
+
+    public String getExpression1() {
+        return expression1;
+    }
+
+    public void setExpression1(String expression1) {
+        this.expression1 = expression1;
+    }
+
+    public String getExpression2() {
+        return expression2;
+    }
+
+    public void setExpression2(String expression2) {
+        this.expression2 = expression2;
+    }
+    
     public boolean isError() {
         return error;
     }
@@ -237,7 +361,7 @@ public class Instruction {//possible class Field with sub classes label mnemonic
         if(this.getMnemonic().trim().equalsIgnoreCase("rsub"))
         	if(this.getOperand().charAt(0)!=' ') {
         		this.setError(true);
-    			this.setErrorMessage("\t\t****Error: This statement can’t have an operand");
+    			this.setErrorMessage("\t\t****Error: This statement cannot have an operand");
         	}
     }
     
