@@ -1,0 +1,16 @@
+.2345678901234567890
+prog     start   0100
+         ldb     gamma
+         lds     beta
+         ldt     gamma
+         rmo     a,x
+         rmo     g
+         sts     alpha
+         lda     beta
+         sta     delta
+         J       *
+beta     WORD    20
+gamma    byte    c'aefjea'
+alpha    RESW    1
+delta    RESW    1
+aaaa     end     prog
