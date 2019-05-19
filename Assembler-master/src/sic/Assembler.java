@@ -363,6 +363,7 @@ public class Assembler {
             BufferedWriter writer = new BufferedWriter(new FileWriter(file));
             writer.write("H^" + name + "^" + address+"^"+stringLength);
             writer.newLine();
+            writer.newLine();
             for (int i = 0; i < Instructions.size(); i++){
             	int sum=0;
             	ArrayList<Instruction> inss=new ArrayList<>();
@@ -371,6 +372,7 @@ public class Assembler {
             	while(sum+Instructions.get(i).getSize()<=30&&!Instructions.get(i).getObc().equals("")) {
             		if(!Instructions.get(i).isCommentLine())
             		inss.add(Instructions.get(i));
+            		sum+=Instructions.get(i).getSize();
             		i++;
             	}
             	if(inss.size()>=1) {
@@ -382,6 +384,7 @@ public class Assembler {
 	            	writer.newLine();
             	}
             }
+            writer.newLine();
             writer.write("E^"+labels.get(0).getAddress());
 			writer.close();
 	}
@@ -403,13 +406,13 @@ public class Assembler {
             String text="";
             
             opch(Instructions);
-            text+="Line no.\tAddress\tObjectC\tLabel\t\tMnemonic\tOperands";
+            text+="Line no.\tAddress\tObjectC\tLabel\tMnemonic\tOperands";
             writer = new BufferedWriter(new FileWriter(logFile));
             writer.write(text);
             writer.newLine();
             for(int i=0;i<Instructions.size();i++) {
                     if(!Instructions.get(i).isCommentLine()) {
-                            text=""+(i+1)+"\t\t"+Instructions.get(i).getAddress()+"\t"+Instructions.get(i).getObc()+"\t"+Instructions.get(i).getLabel()+"\t"+Instructions.get(i).getMnemonic()+"\t\t"+Instructions.get(i).getOperand();
+                            text=""+(i+1)+"\t"+Instructions.get(i).getAddress()+"\t"+Instructions.get(i).getObc()+"\t"+Instructions.get(i).getLabel()+"\t"+Instructions.get(i).getMnemonic()+"\t"+Instructions.get(i).getOperand();
                             writer.write(text);
                             writer.newLine();
                             if(Instructions.get(i).isError()){
@@ -420,7 +423,7 @@ public class Assembler {
                             }
                     }
                             else { 
-                            text =""+(i+1)+"\t\t"+Instructions.get(i).getAddress()+"\t"+Instructions.get(i).getComment();
+                            text =""+(i+1)+"\t"+Instructions.get(i).getComment();
                             writer.write(text);
                             writer.newLine();
                             }	
@@ -496,18 +499,28 @@ public class Assembler {
 	    			int add;
 	    			int TA = 0;
 	    			int lctr=Integer.parseInt(Instructions.get(i).getAddress(),16);
+	    			String op=Instructions.get(i).getOperand().trim();
+	    			if(op.charAt(0)=='#'||op.charAt(0)=='@')
+	    				op=op.substring(1,op.length());
 	    			for(int j=0;j<labels.size();j++) {
 	    				if(Instructions.get(i).getOperand().equalsIgnoreCase(labels.get(j).getLabel())) {
 	    					TA=Integer.parseInt(labels.get(j).getAddress(),16);
 	    					break;
 	    				}
 	    			}
-	    			add=TA-lctr;
-	    			if(add>-2045&&add<2045)
-	    				s=s+"010";
-	    			else{
-	    				add=TA-Integer.parseInt(base,16);
-	    				s=s+"100";
+	    			
+	    			try {
+	    				add=Integer.parseInt(op);
+	    				s=s+"000";
+	    			}
+	    			catch(Exception e){
+	    				add=TA-lctr;
+		    			if(add>-2045&&add<2045)
+		    				s=s+"010";
+		    			else{
+		    				add=TA-Integer.parseInt(base,16);
+		    				s=s+"100";
+		    			}
 	    			}
 	    			String disp=Integer.toBinaryString(add);
 	    			while(disp.length()<12) {
@@ -517,7 +530,10 @@ public class Assembler {
 	    				disp=disp.substring(1,disp.length());
 	    			}
 	    			s=s+disp;
-	    			Instructions.get(i).setObc(Integer.toHexString(Integer.parseInt(s,2)));
+	    			if(s.substring(0,4).equals("0000"))
+	    				Instructions.get(i).setObc("0"+Integer.toHexString(Integer.parseInt(s,2)));
+	    			else
+	    				Instructions.get(i).setObc(Integer.toHexString(Integer.parseInt(s,2)));
 	    		}
 	    		else if(Instructions.get(i).getFormat()==4&&!Instructions.get(i).isError()) {
 	    			String s=Integer.toBinaryString(Integer.parseInt(Instructions.get(i).getOpcode(),16));
@@ -533,12 +549,20 @@ public class Assembler {
 	    			else
 	    				s=s+"0";
 	    			int TA = 0;
+	    			String op=Instructions.get(i).getOperand().trim();
 	    			int lctr=Integer.parseInt(Instructions.get(i).getAddress(),16);
-	    			for(int j=0;j<labels.size();j++) {
-	    				if(Instructions.get(i).getOperand().equalsIgnoreCase(labels.get(j).getLabel())) {
-	    					TA=Integer.parseInt(labels.get(j).getAddress(),16);
-	    					break;
-	    				}
+	    			if(op.charAt(0)=='#'||op.charAt(0)=='@')
+	    				op=op.substring(1,op.length());
+	    			try {
+	    				TA=Integer.parseInt(op);
+	    			}
+	    			catch(Exception e) {
+		    			for(int j=0;j<labels.size();j++) {
+		    				if(Instructions.get(i).getOperand().trim().equalsIgnoreCase(labels.get(j).getLabel())) {
+		    					TA=Integer.parseInt(labels.get(j).getAddress(),16);
+		    					break;
+		    				}
+		    			}
 	    			}
 	    			s=s+"001";
 	    			String disp=Integer.toBinaryString(TA);
@@ -549,7 +573,11 @@ public class Assembler {
 	    				disp=disp.substring(1,disp.length());
 	    			}
 	    			s=s+disp;
-	    			Instructions.get(i).setObc(Integer.toHexString(Integer.parseInt(s,2)));
+	    			if(s.substring(0,4).equals("0000"))
+	    				Instructions.get(i).setObc("0"+Integer.toHexString(Integer.parseInt(s,2)));
+	    			else
+	    				Instructions.get(i).setObc(Integer.toHexString(Integer.parseInt(s,2)));
+	    			
 	    		}
 	    		else if(Instructions.get(i).getMnemonic().trim().equalsIgnoreCase("byte")&&!Instructions.get(i).isError()) {
 	    			String op="";
@@ -580,9 +608,11 @@ public class Assembler {
 	    		}
 	    		else
 	    			Instructions.get(i).setObc("");
+    		}
     	}
     }
-    }
+    
+    
     
     public static void main(String[] args) {
         // TODO code application logic here
@@ -594,10 +624,15 @@ public class Assembler {
             System.out.println("\n\n\t\tSuccessful Assembly");
         else System.out.println("\n\n\t\tIncomplete Assembly");
         
-       /* String operand = "mm'1234'abcd";
-        int start = operand.indexOf('\'');
-        int end = operand.lastIndexOf('\'');
-        System.out.println(operand.substring(start+1,end));*/
+       try {
+		new GUItext("List File","listfile.txt");
+	} catch (IOException e) {
+	}
+       try {
+   		new GUItext("Object File","obj.txt");
+   	} catch (IOException e) {
+   	}
+        
     }
     
 }

@@ -1,28 +1,25 @@
-Line no.	Address	ObjectC	Label		Mnemonic	Operands
-1		ffffffff	.2345678901234567890
-2		100		prog     	start   		0100
-3		100	d0201c	         	ldb     		gamma
-4		103	d82016	         	lds     		beta
-5		106	e82016	         	ldt     		gamma
-6		109	AC01	         	rmo     		a,x
-7		10b		         	rmo     		g
-
-		****Error: Operand too Short
-8		10d	f82015	         	sts     		alpha
-9		110	2009	         	lda     		beta
-10		113	c02012	         	sta     		delta
-11		116	f02eea	         	J       		*
-12		119	14	beta     	WORD    		20
-13		11c	6165666a6561	gamma    	byte    		c'aefjea'
-14		122		alpha    	RESW    		1
-15		125		delta    	RESW    		1
-16		128		aaaa     	end     		prog
-		****Error: This statment can't have a label
+Line no.	Address	ObjectC	Label	Mnemonic	Operands
+1	.2345678901234567890
+2	100		prog     	start   	0100
+3	100	01001e	         	lda     	#30
+4	103	d0201c	         	ldb     	gamma
+5	106	d82016	         	lds     	beta
+6	109	e82016	         	ldt     	gamma
+7	10c	AC01	         	rmo     	a,x
+8	10e	AC54	         	rmo     	t,s
+9	110	f82015	         	sts     	alpha
+10	113	02009	         	lda     	beta
+11	116	c02012	         	sta     	delta
+12	119	f02ee7	         	J       	*
+13	11c	14	beta     	WORD    	20
+14	11f	6165666a6561	gamma    	byte    	c'aefjea'
+15	125		alpha    	RESW    	1
+16	128		delta    	RESW    	1
+17	12b		         	end     	prog
 Symbol Table:
 Label 	 Address
 prog     	100
-beta	119
-gamma	11c
-alpha	122
-delta	125
-aaaa	128
+beta	11c
+gamma	11f
+alpha	125
+delta	128
