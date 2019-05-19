@@ -1,0 +1,15 @@
+.2345678901234567890
+prog     start   0100
+         lds     beta
+         ldt     gamma
+         sts     alpha+gamma-gamma
+         j       *-6
+         lda     #3+4+5+1
+         subr    s,a
+         sta     delta
+         J       *
+beta     WORD    20
+gamma    WORD    3
+alpha    RESW    1
+delta    RESW    1
+         end     prog

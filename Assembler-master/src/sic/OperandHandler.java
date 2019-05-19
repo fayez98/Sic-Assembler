@@ -188,7 +188,7 @@ public static void memoryErrors(Instruction ins){ //Pass1
                                             ins.setIndirect(true);
                                         }else ins.setImmediate(true);
 		    			operand=operand.substring(1,operand.length());
-                                        if(operand.length()==1){
+                                        if(operand.length()==0){
                                             ins.appendErrorMessage("\t\t****Error: Operand Missing ");
                                         }
                                         else if(operand.contains("@")||operand.contains("#")){

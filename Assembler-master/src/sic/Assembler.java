@@ -486,14 +486,13 @@ public class Assembler {
 	    			while(s.length()<8)
 	    				s="0"+s;
 	    			s=s.substring(0,6);
-	    			System.out.println(s);
 	    			if(Instructions.get(i).isImmediate())
 	    				s=s+"01";
 	    			else if(Instructions.get(i).isIndirect())
 	    				s=s+"10";
 	    			else 
 	    				s=s+"11";
-	    			if(Instructions.get(i).isIndexing())
+	    			if(Instructions.get(i).isIndexing()) 
 	    				s=s+"1";
 	    			else
 	    				s=s+"0";
@@ -504,14 +503,15 @@ public class Assembler {
 	    			int flag=0;
 	    			if(op.charAt(0)=='#'||op.charAt(0)=='@')
 	    				op=op.substring(1,op.length());
+	    			if(Instructions.get(i).isIndexing())
+	    				op=op.substring(0,op.length()-2);
 	    			String ad[]=op.split("\\+");
 	    			String mi[]=op.split("-");
 	    			String div[]=op.split("/");
 	    			String mul[]=op.split("\\*");
-	    			System.out.println(ad[0]);
 	    			if(ad.length<2&&mi.length<2&&div.length<2&&mul.length<2||op.charAt(0)=='*') {
 		    			for(int j=0;j<labels.size();j++) {
-		    				if(Instructions.get(i).getOperand().equalsIgnoreCase(labels.get(j).getLabel())) {
+		    				if(op.equalsIgnoreCase(labels.get(j).getLabel())) {
 		    					TA=Integer.parseInt(labels.get(j).getAddress(),16);
 		    					break;
 		    				}
@@ -622,21 +622,15 @@ public class Assembler {
 		    				s=s+"000";
 		    			}
 		    			catch(Exception e){
-		    				if(Instructions.get(i).isImmediate()&&flag==0) {
-		    					add=TA;
-		    					s=s+"000";
-		    				}
-		    				else {
-			    				add=TA-lctr;
-				    			if(add>-2045&&add<2045)
-				    				s=s+"010";
-				    			else{
-				    				add=TA-Integer.parseInt(base,16);
-				    				if(add<0)
-				    					add=4095-add;
-				    				s=s+"100";
-				    			}
-		    				}
+				    				add=TA-lctr;
+					    			if(add>-2045&&add<2045)
+					    				s=s+"010";
+					    			else{
+					    				add=TA-Integer.parseInt(base,16);
+					    				if(add<0)
+					    					add=4095-add;
+					    				s=s+"100";
+					    			}
 		    			}
 		    			if(op.charAt(0)=='*') {
 		    				if(op.length()==1) {
