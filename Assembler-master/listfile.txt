@@ -1,25 +1,23 @@
 Line no.	Address	ObjectC	Label	Mnemonic	Operands
 1	.2345678901234567890
 2	100		prog     	start   	0100
-3	100	01001e	         	lda     	#30
-4	103	d0201c	         	ldb     	gamma
-5	106	d82016	         	lds     	beta
-6	109	e82016	         	ldt     	gamma
-7	10c	AC01	         	rmo     	a,x
-8	10e	AC54	         	rmo     	t,s
-9	110	f82015	         	sts     	alpha
-10	113	02009	         	lda     	beta
-11	116	c02012	         	sta     	delta
-12	119	f02ee7	         	J       	*
-13	11c	14	beta     	WORD    	20
-14	11f	6165666a6561	gamma    	byte    	c'aefjea'
-15	125		alpha    	RESW    	1
-16	128		delta    	RESW    	1
-17	12b		         	end     	prog
+3	100	6F2014	         	lds     	beta
+4	103	772014	         	ldt     	gamma
+5	106	7F2011	         	sts     	alpha-gamma+gamma
+6	109	3F2FF7	         	j       	*-6
+7	10c	01000D	         	lda     	#3+4+5+1
+8	10f	9440	         	subr    	s,a
+9	111	0F200C	         	sta     	delta
+10	114	3F2000	         	J       	*
+11	117	000014	beta     	WORD    	20
+12	11a	000003	gamma    	WORD    	3
+13	11d		alpha    	RESW    	1
+14	120		delta    	RESW    	1
+15	123		         	end     	prog
 Symbol Table:
 Label 	 Address
 prog     	100
-beta	11c
-gamma	11f
-alpha	125
-delta	128
+beta	117
+gamma	11a
+alpha	11d
+delta	120

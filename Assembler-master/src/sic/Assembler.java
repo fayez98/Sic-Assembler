@@ -483,57 +483,185 @@ public class Assembler {
 	    		}
 	    		else if(Instructions.get(i).getFormat()==3&&!Instructions.get(i).isError()) {
 	    			String s=Integer.toBinaryString(Integer.parseInt(Instructions.get(i).getOpcode(),16));
-	    			while(s.length()<6)
-	    				s=s+"0";
+	    			while(s.length()<8)
+	    				s="0"+s;
 	    			s=s.substring(0,6);
+	    			System.out.println(s);
 	    			if(Instructions.get(i).isImmediate())
 	    				s=s+"01";
 	    			else if(Instructions.get(i).isIndirect())
 	    				s=s+"10";
 	    			else 
-	    				s=s+"00";
+	    				s=s+"11";
 	    			if(Instructions.get(i).isIndexing())
 	    				s=s+"1";
 	    			else
 	    				s=s+"0";
 	    			int add;
 	    			int TA = 0;
-	    			int lctr=Integer.parseInt(Instructions.get(i).getAddress(),16);
+	    			int lctr=Integer.parseInt(Instructions.get(i+1).getAddress(),16);
 	    			String op=Instructions.get(i).getOperand().trim();
+	    			int flag=0;
 	    			if(op.charAt(0)=='#'||op.charAt(0)=='@')
 	    				op=op.substring(1,op.length());
-	    			for(int j=0;j<labels.size();j++) {
-	    				if(Instructions.get(i).getOperand().equalsIgnoreCase(labels.get(j).getLabel())) {
-	    					TA=Integer.parseInt(labels.get(j).getAddress(),16);
-	    					break;
+	    			String ad[]=op.split("\\+");
+	    			String mi[]=op.split("-");
+	    			String div[]=op.split("/");
+	    			String mul[]=op.split("\\*");
+	    			System.out.println(ad[0]);
+	    			if(ad.length<2&&mi.length<2&&div.length<2&&mul.length<2||op.charAt(0)=='*') {
+		    			for(int j=0;j<labels.size();j++) {
+		    				if(Instructions.get(i).getOperand().equalsIgnoreCase(labels.get(j).getLabel())) {
+		    					TA=Integer.parseInt(labels.get(j).getAddress(),16);
+		    					break;
+		    				}
+		    			}
+		    		}
+	    			else if(ad.length>=2) {
+	    				int k;
+	    				for(int j=0;j<ad.length;j++) {
+	    					for(k=0;k<labels.size();k++) {
+	    						if(ad[j].equalsIgnoreCase(labels.get(k).getLabel())) {
+	    							TA+=Integer.parseInt(labels.get(k).getAddress(),16);
+	    							flag=1;
+			    					break;
+	    						}
+	    					}
+	    					if(k==labels.size()) {
+	    						try {
+	    							TA+=Integer.parseInt(ad[j]);
+	    						}
+	    						catch(Exception e) {
+	    							
+	    						}
+	    					}
+	    				}
+	    			}
+	    			else if(mi.length>=2) {
+	    				int k;
+	    				for(k=0;k<labels.size();k++) {
+    						if(ad[0].equalsIgnoreCase(labels.get(k).getLabel())) {
+    							TA+=Integer.parseInt(labels.get(k).getAddress(),16);
+    							flag=1;
+		    					break;
+    						}
+    					}
+	    				for(int j=1;j<ad.length;j++) {
+	    					for(k=0;k<labels.size();k++) {
+	    						if(ad[j].equalsIgnoreCase(labels.get(k).getLabel())) {
+	    							TA-=Integer.parseInt(labels.get(k).getAddress(),16);
+	    							flag=1;
+			    					break;
+	    						}
+	    					}
+	    					if(k==labels.size()) {
+	    						try {
+	    							TA-=Integer.parseInt(ad[j]);
+	    						}
+	    						catch(Exception e) {
+	    							
+	    						}
+	    					}
+	    				}
+	    			}	
+	    			else if(div.length>=2) {
+	    				int k;
+	    				for(k=0;k<labels.size();k++) {
+    						if(ad[0].equalsIgnoreCase(labels.get(k).getLabel())) {
+    							TA+=Integer.parseInt(labels.get(k).getAddress(),16);
+    							flag=1;
+		    					break;
+    						}
+    					}
+	    				for(int j=1;j<ad.length;j++) {
+	    					for(k=0;k<labels.size();k++) {
+	    						if(ad[j].equalsIgnoreCase(labels.get(k).getLabel())) {
+	    							TA/=Integer.parseInt(labels.get(k).getAddress(),16);
+	    							flag=1;
+			    					break;
+	    						}
+	    					}
+	    					if(k==labels.size()) {
+	    						try {
+	    							TA/=Integer.parseInt(ad[j]);
+	    						}
+	    						catch(Exception e) {
+	    							
+	    						}
+	    					}
+	    				}
+	    			}
+	    			else if(mul.length>=2) {
+	    				int k;
+	    				for(k=0;k<labels.size();k++) {
+    						if(ad[0].equalsIgnoreCase(labels.get(k).getLabel())) {
+    							TA+=Integer.parseInt(labels.get(k).getAddress(),16);
+		    					break;
+    						}
+    					}
+	    				for(int j=1;j<ad.length;j++) {
+	    					for(k=0;k<labels.size();k++) {
+	    						if(ad[j].equalsIgnoreCase(labels.get(k).getLabel())) {
+	    							TA*=Integer.parseInt(labels.get(k).getAddress(),16);
+			    					break;
+	    						}
+	    					}
+	    					if(k==labels.size()) {
+	    						try {
+	    							TA*=Integer.parseInt(ad[j]);
+	    						}
+	    						catch(Exception e) {
+	    							
+	    						}
+	    					}
 	    				}
 	    			}
 	    			
-	    			try {
-	    				add=Integer.parseInt(op);
-	    				s=s+"000";
-	    			}
-	    			catch(Exception e){
-	    				add=TA-lctr;
-		    			if(add>-2045&&add<2045)
-		    				s=s+"010";
-		    			else{
-		    				add=TA-Integer.parseInt(base,16);
-		    				s=s+"100";
+		    			try {
+		    				add=Integer.parseInt(op);
+		    				s=s+"000";
 		    			}
-	    			}
-	    			String disp=Integer.toBinaryString(add);
-	    			while(disp.length()<12) {
-	    				disp="0"+disp;
-	    			}
-	    			while(disp.length()>12) {
-	    				disp=disp.substring(1,disp.length());
-	    			}
-	    			s=s+disp;
-	    			if(s.substring(0,4).equals("0000"))
-	    				Instructions.get(i).setObc("0"+Integer.toHexString(Integer.parseInt(s,2)));
-	    			else
-	    				Instructions.get(i).setObc(Integer.toHexString(Integer.parseInt(s,2)));
+		    			catch(Exception e){
+		    				if(Instructions.get(i).isImmediate()&&flag==0) {
+		    					add=TA;
+		    					s=s+"000";
+		    				}
+		    				else {
+			    				add=TA-lctr;
+				    			if(add>-2045&&add<2045)
+				    				s=s+"010";
+				    			else{
+				    				add=TA-Integer.parseInt(base,16);
+				    				if(add<0)
+				    					add=4095-add;
+				    				s=s+"100";
+				    			}
+		    				}
+		    			}
+		    			if(op.charAt(0)=='*') {
+		    				if(op.length()==1) {
+		    					add=0;
+		    				}
+		    				else {
+		    					op=op.substring(1,op.length());
+		    					if(op.charAt(0)=='+')
+		    						add=Integer.parseInt(op.substring(1,op.length()))-3;
+		    					else
+		    						add=4095-Integer.parseInt(op.substring(1,op.length()))-2;
+		    				}
+		    			}
+		    			String disp=Integer.toBinaryString(add);
+		    			while(disp.length()<12) {
+		    				disp="0"+disp;
+		    			}
+		    			while(disp.length()>12) {
+		    				disp=disp.substring(1,disp.length());
+		    			}
+		    			s=s+disp;
+		    			if(s.substring(0,4).equals("0000"))
+		    				Instructions.get(i).setObc("0"+Integer.toHexString(Integer.parseInt(s,2)));
+		    			else
+		    				Instructions.get(i).setObc(Integer.toHexString(Integer.parseInt(s,2)));
 	    		}
 	    		else if(Instructions.get(i).getFormat()==4&&!Instructions.get(i).isError()) {
 	    			String s=Integer.toBinaryString(Integer.parseInt(Instructions.get(i).getOpcode(),16));
@@ -601,13 +729,23 @@ public class Assembler {
 	    			for(int j=0;j<nums.length;j++) {
 	    				ob=ob+Integer.toHexString(Integer.parseInt(nums[j]));
 	    			}
-	    			if(f==1)
-	    			Instructions.get(i).setObc(ob);
-	    			else
-	    				Instructions.get(i).setObc(Integer.toHexString(Integer.parseInt(Instructions.get(i).getOperand())));
+	    			if(f==1) {
+	    				if(Integer.parseInt(nums[i])<16)
+	    					Instructions.get(i).setObc("00000"+ob);
+	    				else
+	    					Instructions.get(i).setObc("0000"+ob);
+	    			}
+	    			else {
+	    				int x=Integer.parseInt(Instructions.get(i).getOperand());
+	    				if(x<16)
+	    					Instructions.get(i).setObc("00000"+Integer.toHexString(x));
+	    				else
+	    					Instructions.get(i).setObc("0000"+Integer.toHexString(x));
+	    				}
 	    		}
 	    		else
 	    			Instructions.get(i).setObc("");
+	    		Instructions.get(i).setObc(Instructions.get(i).getObc().toUpperCase());
     		}
     	}
     }
